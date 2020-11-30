@@ -1,4 +1,4 @@
-# 2020hemibrain (name to be changed) examples
+# 2020hemibrain (name TBC) examples
 This repo example code for Schlegel, Bates et al. (2020) (link). 
 
 ## Relevant libraries
@@ -31,3 +31,6 @@ and adds a few convenience functions to fetch hemibrain data.
 ### R 
 
 ### Python
+#### Olfactory Layers - Network Traversal
+`Examples/Python/1_network_traversal_model.ipynb` [link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/Examples/Python/1_network_traversal_model.ipynb)
+show cases the network traversal model used to sort neurons into layers with respect to the olfactory system.
