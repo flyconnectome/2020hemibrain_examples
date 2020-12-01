@@ -59,7 +59,30 @@ Research Campus) that allows you to programmatically query the hemibrain connect
 and adds a few convenience functions to fetch hemibrain data.
 
 ## Code Examples
-### R 
+### R
+#### Authorisation with neuPrint
+`examples/R/authorisation.Rmd` 
+[link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/authorisation.Rmd)
+how to connect your R session to neuPrint so you can read data from the connectome analysis service.
+
+#### Make a custom query with neuprint
+`examples/R/customquery.Rmd` 
+[link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/customquery.Rmd)
+neuPrint includes both an [API](https://neuprint.janelia.org/help/api) which
+provides a range of queries as well as the option to send custom queries 
+written in the [Cypher query language](https://neo4j.com/developer/cypher-query-language/)
+of the [Neo4j](https://neo4j.com) graph database. It is probably worth making queries via the API if they will solve your problem.
+However custom queries offer maximum flexibility.
+
+#### Work with antennal lobe projection neurons from neuprint
+`examples/R/hemibrain_opns.Rmd` 
+[link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/hemibrain_opns.Rmd)
+use `neuprintr` to pull morphology and synaptic data for hemibrain antennal lobe projection neurons from neuprint, and perform basic analyses.
+
+#### Axon and dendrite splits for neurons
+`examples/R/hemibrain_axons_dendrites.Rmd` 
+[link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/hemibrain_axons_dendrites.Rmd)
+use `hemibrainr` to pull morphology and synaptic data for hemibrain neurons and split them, and their connectivity, into axon their axon and dendrite compartments. This split has been overlooke in Drosophila neuroscience to date but it likely to be crucial in understaning the role of neurons in  circuits.
 
 ### Python
 #### Olfactory Layers - Network Traversal
