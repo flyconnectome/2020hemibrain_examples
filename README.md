@@ -41,7 +41,7 @@ hemibrain](https://www.janelia.org/project-team/flyem) project. It contains spec
 [nat](https://natverse.github.io/nat/) and a lot of the other packages are built on top of it. It handles data representing neurons, such as 
 skeletons or meshes, and lets you analyze and manipulate it. `navis` has a [quickstart](https://navis.readthedocs.io/en/latest/source/tutorials/quickstart.html) 
 guide, an extensive [API documentation](https://navis.readthedocs.io/en/latest/source/api.html) and several 
-[tutorials(https://navis.readthedocs.io/en/latest/source/gallery.html) including one to fetch hemibrain data via neuprint. `navis` also provides an interfaces with R natverse functions for example `nat.nblast` or `xform_brain` (see tutorials)
+[tutorials](https://navis.readthedocs.io/en/latest/source/gallery.html) including one to fetch hemibrain data via neuprint. `navis` also provides an interfaces with R natverse functions for example `nat.nblast` or `xform_brain` (see tutorials)
 
 #### pymaid
 [pymaid](https://pymaid.readthedocs.io/en/latest/) is a library that lets you interact programmatically with a CATMAID server: fetch neurons, add/remove
