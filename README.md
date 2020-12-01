@@ -1,13 +1,13 @@
-<center>
-![hemibrain](https://raw.githubusercontent.com/flyconnectome/2020hemibrain_examples/images/hemibrain.png)
-</center>
+<p align="center">
+<img src="https://github.com/flyconnectome/2020hemibrain_examples/blob/main/images/hemibrain.png?raw=true" width="400">
+</p>
 
 # 2020hemibrain (name TBC) examples
 This repository stores example code for [Schlegel, Bates et al. (2020)](). Here we describe tools in both R and python to work with connectome data for the adult fly brain. This is principally the dense [Janelia FlyEM hemibrain connectome](https://www.janelia.org/project-team/flyem) project, but also sparse connectomic reconstructions from the [full adult female brain (FAFB) dataset](https://neuropil.janelia.org/tracing/fafb/v14/).
 
-<center>
-![hemibrain_to_FAFB](https://raw.githubusercontent.com/flyconnectome/2020hemibrain_examples/images/hemibrain_to_FAFB.png)
-</center>
+<p align="center">
+<img src="https://github.com/flyconnectome/2020hemibrain_examples/blob/main/images/hemibrain_to_FAFB.png?raw=true" width="700">
+</p>
 
 ## Relevant libraries
 ### R 
