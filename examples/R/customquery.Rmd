@@ -1,0 +1,173 @@
+---
+title: "Writing query functions in neuprintr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{customquery}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Introduction
+
+neuPrint includes both an [API](https://neuprint.janelia.org/help/api) which
+provides a range of queries as well as the option to send *custom queries* 
+written in the [Cypher query language](https://neo4j.com/developer/cypher-query-language/)
+of the [Neo4j](https://neo4j.com) graph database.
+
+It is probably worth making queries via the API if they will solve your problem.
+However custom queries offer maximum flexibility.
+
+## Do you need a function?
+
+It is a great idea to wrap your queries in a function. This will make 
+your code cleaner and more reusable. But do check the documentation to ensure
+that there isn't already a neuprintr function that does the job. If there is
+something that almost looks correct, then consider asking us to adapt it!
+
+## Custom query functions
+
+We'll start by giving a basic example query function. Most of the time you should
+just be able to edit this example without worrying about the details. The
+subsequent sections give you some information about those details.
+
+### Basic example
+
+This function takes one or more bodyids as input and returns the name of the 
+neurons.
+
+```{r, eval=FALSE}
+neuprint_get_neuron_names <- function(bodyids, dataset = NULL, all_segments = FALSE,
+                                      conn = NULL, ...) {
+  bodyids = neuprint_ids(bodyids, conn = conn, dataset = dataset)
+  all_segments.json = ifelse(all_segments,"Segment", "Neuron")
+  cypher = sprintf("WITH %s AS bodyIds UNWIND bodyIds AS bodyId MATCH (n:`%s`) WHERE n.bodyId=bodyId RETURN n.instance AS name",
+                   id2json(bodyids),
+                   all_segments.json)
+
+  nc = neuprint_fetch_custom(cypher=cypher, conn = conn, dataset = dataset, ...)
+  d =  unlist(lapply(nc$data,nullToNA))
+  names(d) = bodyids
+  d
+}
+```
+
+`bodyids` is the main input argument. These typically come in as either character
+vector or numeric format. By passing the argument to the `neuprint_ids()` function
+you can also enable a range of queries to define the bodyids. The internal function
+`id2json()` is eventually used to look after formatting them appropriately for
+the Neo4j cypher query.
+
+In this function, `cypher` is the actual query written in the 
+[Cypher query language](https://neo4j.com/developer/cypher-query-language/). 
+One helpful tip. *You can press the i key in neuPrint explorer to reveal the cypher query*!
+
+Many functions that operate on neurons will have an argument controlling whether
+they operate only for larger objects (aka *Neuron*) or also on fragments (aka *Segment*).
+Restricting queries to *Neuron* can result in big speed-ups in some cases.
+You can provide an `all_segments` argument to handle this option.
+
+Finally the results that come back from `neuprint_fetch_custom` are typically
+in a big list object. For simple results, you can just `unlist()` this to make a
+vector. In this case a function `nullToNA` is first applied in order to ensure
+that any values that come back as `NULL` are converted to `NA`; this is necessary
+to ensure that you can make a vector - vector objects can only contain `NA`s not `NULL`s.
+
+### Preparing the query
+
+As you can see this step uses the `sprintf` function to interpolate variables
+into a string. You could do this in other ways (e.g. the `paste()` function or
+the `glue()` package). You may need to watch out for quoting issues if you should
+need to use single or double quotes inside your queries.
+
+### Body ids
+
+You need to be a little careful with the handling of body ids. The basic advice
+is to pass them to `neuprint_ids()` on entry to your function. This will ensure
+that there is at least one id (unless `mustWork=FALSE`) and convert to character
+vector. It also allows simple queries (by default exact matches against the 
+type field). Finally it will by default ensure that only unique ids are passed 
+in. This is *nearly* always what you want, but be careful.
+
+In more detail, body ids are 64 bit
+integers (often called `bigint`s), which are commonly used as keys in databases.
+However like many programming languages R does not have a native 64 bit integer
+type. R's default numeric format is double width floating point. This can 
+exactly handle numbers with up to 53 bits of precision. 
+
+However, the biggest integer (here data is represented in signed format `int64`) that we need to worry about is (2^63)-1 = 9,223,372,036,854,775,807. This cannot be represented as a numeric. I have yet to 
+spot a body id in this upper range, but the `neuprint_ids` function will take care
+that you do not use one. If you need to specify a large bodyid as input to your
+function then you should insist on 
+
+* character vector input
+* 64 bit integers provided by `bit64::integer64()`
+
+The latter seems better in theory (since it is more compact) than using 
+character vectors, but it relies on an add-on package (bit64) rather than base R
+and I have seen subtle errors when `integer64` objects lose their class. 
+In particular you cannot turn them into a list or run `lapply` without losing their class. Therefore I recommend using character vectors where possible. 
+
+Bottom line
+
+* always apply `neuprint_ids()` to your incoming body ids to enable a range of 
+simple queries and check that your input looks sensible.
+* always use `id2json()` on your body ids when building your cypher
+* if you work with your body ids inside your function and do not start by passing
+them to `neuprint_ids()`, then at least use `id2char` to put them into the 
+most robust standard form (a character vector).
+
+### Connecting to neuPrint
+
+In order to make a query, you need to specify which neuPrint *server* you want to
+talk to as well as the *dataset* you would like to use. The server is specified
+by a `neuprint_connection()` object. 99% of the time you will not need to do 
+anything as this will be handled transparently by a one time user setting to
+specify their preferred server and authentication token. 
+
+The same is true of the dataset parameter, with the additional feature that 
+that `neuprint_fetch_custom()` will internally check for a default dataset for
+the current server (as defined by the `conn` connection object).
+
+However your function must allow people to specify both of these things if they
+wish. Therefore your function should look something like this in outline:
+
+```{r, eval=FALSE}
+
+myquery <- function(query, conn=NULL, dataset=NULL, ...) {
+  neuprint_fetch_custom(query, conn=conn, dataset=dataset, ...)
+}
+
+```
+
+Internally `neuprint_fetch_custom()`, which will look after the `dataset` 
+argument, and then go on to call the low level `neuprint_fetch()`, which will
+ensure that the connection object is valid (or use `neuprint_login()` to make one).
+
+### Processing the results
+
+The sample function just ran `unlist()` on the list returned by `neuprint_fetch_custom()`. 
+This is fine in many cases. You can also pass the `simplifyVector` argument to
+`neuprint_fetch_custom()` and this will clean up many forms of list. See 
+`jsonlite::fromJSON()` for details of how this operates.
+
+If you are getting a nested list specifying
+a table (i.e. a `data.frame` or spreadsheet like result) then there is a
+function `neuprint_list2df()` which will do a lot of the heavy lifting.
+It is strongly recommended to make use of this whenever possible. See
+`neuprint_get_meta()` for an example. Note that `neuprint_list2df()` has an 
+argument with default `stringsAsFactors=FALSE` to ensure that columns in the
+output `data.frame` will be character vectors unless you take steps to make 
+them factors.
+
+## Need help?
+
+Feel free to ask for help on the [nat-user google group](https://groups.google.com/forum/#!forum/nat-user) or by 
+[making an issue](https://github.com/natverse/neuprintr/issues/).
