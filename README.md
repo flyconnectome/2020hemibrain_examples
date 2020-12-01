@@ -12,15 +12,15 @@ This repository stores example code for [Schlegel, Bates et al. (2020)](). Here 
 ## Relevant libraries
 ### R 
 #### the natverse
-The [natverse](https://github.com/natverse) is an ecosystem of R tools for neuroanatomy [(Bates & Manton et al. 2020)](https://elifesciences.org/articles/53350). It is essentially collection of interoperable R packages to import, visualise, analyse, manipulate and export 3D neuroanatomical data, including neurons, brains and brain regions. It has been used to study brain and circuit organisation in species from flies to fish and mice. These R package allow you to go general neuron analyses, and enable you to move data between different fly brains. The key generalist package in this ecosystem is `nat` (the *n*neuro*a*natomy *a*toolbox).
+The [natverse](https://github.com/natverse) is an ecosystem of R tools for neuroanatomy [(Bates & Manton et al. 2020)](https://elifesciences.org/articles/53350). It is essentially collection of interoperable R packages to import, visualise, analyse, manipulate and export 3D neuroanatomical data, including neurons, brains and brain regions. It has been used to study brain and circuit organisation in species from flies to fish and mice. These R package allow you to go general neuron analyses, and enable you to move data between different fly brains. The key generalist package in this ecosystem is `nat` (the *n*neuro*a*natomy *a*toolbox). Importantly, the natverse contains the following packages:
 
-### rcatmaid
+##### rcatmaid
 This [catmaid](http://natverse.org/rcatmaid/) package provides access to the [CATMAID](https://catmaid.readthedocs.io/en/stable/) API for R users. At present it provides low level functions for appropriately authenticated GET/POST requests, optionally parsing JSON responses. There are also intermediate level functions that retrieve skeleton (i.e. neuron) information, connectivity information for one or more neurons as well as a number of other API endpoints. In the context of our paper, it was used to access manual neuron reconstructions from [FAFB dataset](https://neuropil.janelia.org/tracing/fafb/v14/), some of which was original tracing for this work (hemilineage morphology comparisons) and much of which we have already reported [(Bates & Schlegel et al., 2020)](https://www.sciencedirect.com/science/article/pii/S0960982220308587). You will need a user name, password and unique token to access some CATMAID instances, e.g. there is a [private FAFB instance](https://neuropil.janelia.org/tracing/fafb/v14/), and a [public one](https://catmaid-fafb.virtualflybrain.org/) (no credentials required) for the same data, but with fewer reconstructions. 
 
-### fafbseg
+##### fafbseg
 The goal of the [fafbseg package](http://natverse.org/fafbseg/) is to provide support for analysis of segmented EM data. This includes support for working with neuroglancer mesh data for the [FAFB dataset](https://pubmed.ncbi.nlm.nih.gov/30033368/). In particular there is support for the [FlyWire](https://ngl.flywire.ai/?local_id=0405d158a8adf61ef9013563b65a3535) and [Google brain automatic segmentations](https://www.biorxiv.org/content/10.1101/605634v1) of FAFB data.
 
-### neuprintr
+##### neuprintr
 The goal of [neuprintr](https://github.com/natverse/neuprintr) is to provide R client utilities for interacting
 with the neuPrint connectome analysis service. neuPrint is set of tools
 for loading and analysing connectome data into a Neo4j database. You can
@@ -30,7 +30,7 @@ Github. The main focus is analysis of the
 densely reconstructed adult Drosophila brain dataset available [here](https://neuprint.janelia.org/).
 For more information, have a look [here](https://neuprint.janelia.org/help). 
 
-### hemibrainr
+##### hemibrainr
 The goal of [hemibrainr](https://github.com/natverse/hemibrainr) is to provide useful code for preprocessing and
 analysing data from the [Janelia FlyEM
 hemibrain](https://www.janelia.org/project-team/flyem) project. It contains specific functionality for splitting neurons into axons and dendrites, including split edgelists for connectivity. It also has the capability to load large amount of precomputed data on flywire, FAFB and hemibrain neurons from a linked Google drive. Please see [this article](https://flyconnectome.github.io/hemibrainr/articles/google_filestream.html).
