@@ -84,6 +84,11 @@ use `neuprintr` to pull morphology and synaptic data for hemibrain antennal lobe
 [link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/hemibrain_axons_dendrites.Rmd)
 use `hemibrainr` to pull morphology and synaptic data for hemibrain neurons and split them, and their connectivity, into axon their axon and dendrite compartments. This split has been overlooke in Drosophila neuroscience to date but it likely to be crucial in understaning the role of neurons in  circuits.
 
+#### Examine ALPN connectivity to their downstream targets
+`examples/R/hemibrain_alpns_toons.Rmd` 
+[link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/hemibrain_alpns_toons.Rmd)
+use `hemibrainr` to pull connectivity information, which is broken down by axon and dendrite. Use this and other metadata to build a complex heatmap describing the connectivity of ALPN axons onto their downstream targets, deeper in the brain.
+
 ### Python
 #### Olfactory Layers - Network Traversal
 `examples/Python/1_network_traversal_model.ipynb` [link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/Python/1_network_traversal_model.ipynb)
