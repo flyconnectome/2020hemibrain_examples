@@ -1,0 +1,203 @@
+---
+title: "Getting and plotting ALRN connectivity data"
+author: "Marta Costa"
+date: "02/12/2020"
+output: html_document
+---
+This file shows an example of getting connectivity data from ALRNs in the hemibrain and plotting it.
+The data can be accessed via neuPrint v1.1, using the [`neuprintr`](https://github.com/natverse/neuprintr) package, or the [`hemibrainr`](https://github.com/natverse/hemibrainr) package. 
+
+If using `neuprintr` please note that there might be some minor discrepancies with what is shown in the paper, due to typing changes or differences.
+
+Installation and and set up instructions for both packages are in the links above.
+
+# Set up
+Load the necessary libraries.
+```{r setup, include=FALSE}
+library(knitr)
+library(natverse)
+library(tidyverse)
+library(hemibrainr)
+library(neuprintr)
+library(ggpubr)
+
+# defaults for plot theme
+theme_set(theme_classic(base_size = 12) + theme(text = element_text(family = "sans"), legend.margin=margin(t = 0, unit='cm')))
+```
+
+# Prepare data
+We will use some curated information for ALRNs already in `hemibrainr`: bodyids and some metadata information about them.
+
+The dataframes `rn_info` includes the list of ALRN bodyids (excludes any outliers or ALRNs pending fixes) while `hemibrain_glomeruli_summary` includes info on the types and status of the glomeruli in the dataset.
+
+For the analysis, we will only use glomeruli that are whole (fragmented and non-fragmented RNs), so first we define those. 
+```{r read_data}
+hemibrain_glomeruli_summary %>% 
+  filter(missing == 0) %>%
+  pull(glomerulus) -> whole_frag_gloms
+
+length(whole_frag_gloms)
+```
+Then subset the list of ALRN bodyids to only those glomeruli.
+Add variable for soma_side.
+```{r subset_to_whole_gloms}
+rn.info %>%
+  filter(glomerulus%in%whole_frag_gloms) %>%
+    select(bodyid:type, class, side) -> rn.info.whole
+
+nrow(rn.info.whole)
+```
+# Plot the neurons for one ALRN type
+Plot the VL2p ALRNs with an assigned soma: ipsi- and contralateral.
+```{r plot_vl2p_alrns}
+rn.info.whole %>%
+  filter(glomerulus == "VL2p" & side == "ipsilateral") %>% pull(bodyid) -> vl2p_ipsi
+rn.info.whole %>%
+  filter(glomerulus == "VL2p" & side == "contralateral") %>% pull(bodyid) -> vl2p_contra
+
+# Read in neuron skeletons
+vl2p_sk = neuprint_read_neurons(c( vl2p_ipsi, vl2p_contra))
+
+# read in neuropil meshes
+al.r = hemibrain_roi_meshes(rois = "AL(R)")
+al.l = hemibrain_roi_meshes(rois = "AL(L)")
+
+nopen3d()
+# Set view details
+op = list(FOV = 0, userMatrix = structure(c(0.99992561340332, -0.0120719093829393, 
+0.00176508724689484, 0, -0.00369510054588318, -0.161776661872864, 
+0.98682051897049, 0, -0.0116272661834955, -0.986753582954407, 
+-0.161809235811234, 0, 0, 0, 0, 1), .Dim = c(4L, 4L)), scale = c(1, 
+1, 1), zoom = 0.644609212875366, windowRect = c(1680L, 45L, 2468L, 
+690L))
+
+# plot skeletons showing synapses
+plot3d(vl2p_sk[as.character(vl2p_ipsi)], col = hemibrain_bright_colours["yellow"], WithConnectors = T, lwd=2)
+plot3d(vl2p_sk[as.character(vl2p_contra)], col = hemibrain_bright_colours["darkorange"], WithConnectors = T, lwd=2)
+plot3d(al.r, col = "grey90", alpha=0.1, add=T)
+plot3d(al.l, col = "grey90", alpha=0.1, add=T)
+par3d(op)
+```
+
+# Plot fraction of output per ALRN type
+Define what is not an ALRN, PN, ALLN but has been identified.
+```{r other_neurons_class}
+class_other = c(dan.ids, mbon.ids, ton.ids, lhn.ids, dn.ids, kc.ids, apl.ids, cent.ids, lc.ids)
+```
+
+Read in connectivity data downstream of the ALRNs (those in whole glomeruli) and add metadata for the partners.
+```{r read_conn_data}
+# connectivity data for ALRNs
+alrn_outconn = neuprint_connection_table(rn.info.whole$bodyid, prepost = "POST", roi = "AL(R)", all_segments = F)
+  
+# add class to partner
+alrn_outconn %>%
+  left_join(rn.info.whole) %>%
+  mutate(class_partner = case_when(
+    partner%in%rn.ids ~ "ALRN",
+    partner%in%pn.ids ~ "PN",
+    partner%in%alln.ids ~ "ALLN",
+    partner%in%class_other ~ "other",
+    TRUE ~ "unknown"))-> alrn_outconn
+```
+Calculate the connectivity fractions, per ALRN type.
+```{r get_fraction}
+# Calculate total connectivity per type
+alrn_outconn %>%
+  count(glomerulus, modality, wt=ROIweight, name = "syntotal") -> alrn_out_glom_syntotal
+
+# Calculate the fraction of connectivity for class of partner
+alrn_outconn %>%
+  count(glomerulus, modality, class_partner, wt = ROIweight, name = 'syn') %>%
+  left_join(alrn_out_glom_syntotal) %>%
+  mutate(class_partner = fct_relevel(class_partner, "PN", "ALLN", "ALRN", "other","unknown"),
+         synfrt = syn/syntotal) -> alrn_out_glom_summ
+
+# get order of glomeruli
+alrn_out_glom_summ %>%
+  ungroup() %>%
+  filter(class_partner == "PN") %>%
+  group_by(modality) %>%
+  arrange(desc(synfrt), .by_group = T) %>%
+  pull(glomerulus) -> ordered_gloms_out
+```
+Plotting the fraction of output per partner class per ALRN type.
+```{r plot_alrn_output}
+alrn_out_glom_summ %>%
+  mutate(glomerulus = fct_relevel(glomerulus, ordered_gloms_out)) %>%
+  ggplot(aes(x = glomerulus, y=synfrt, fill = fct_rev(class_partner))) +
+  geom_bar(position="stack", stat="identity") +
+  facet_grid( ~ modality, scales = "free_x", space = "free_x") +
+  scale_fill_manual(values = c("PN" = hemibrain_bright_colors[["brown"]], 
+                               "ALLN" = hemibrain_bright_colors[["green"]],
+                               "ALRN" = hemibrain_bright_colors[["yellow"]], 
+                               "other" = "black", 
+                               "unknown" = "grey70")) +
+  labs(x = "ALRN type", y = "fraction of ALRN output", fill = "from ALRN to:") +
+  scale_y_continuous(expand = (c(0.00, 0.01))) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.2, hjust = 1), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank(), 
+        axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(),
+        strip.background = element_blank(),
+        ) +
+  guides(fill = guide_legend(reverse = TRUE))
+```
+# Compare the fraction of of output per soma side of ALRN
+For this, we will only use the glomeruli that are whole and do not include fragmented ALRNs. Since only 1/7 TRNs or HRNs are bilateral, we use only bilateral ORNs.
+
+```{r get_conn_soma_side}
+hemibrain_glomeruli_summary %>% 
+  filter(missing == 0 & 
+           RN_frag == "no" & 
+           str_detect(glomerulus, "^VP", negate = TRUE) & 
+           laterality == "bilateral") %>%
+  pull(glomerulus) -> whole_nofrag_bil_gloms
+
+alrn_outconn %>% 
+  filter(glomerulus%in%whole_nofrag_bil_gloms) -> bilorn_outconn
+```
+Calculate the fraction per type and soma side.
+Exclude any ALRNs for which the soma side has not been assigned.
+```{r prepare_conn_soma_side}
+bilorn_outconn %>%
+  filter(!is.na(side)) %>%
+  count(side, glomerulus, modality, wt=ROIweight, name = "syntotal") -> bilorn_out_glom_syntotal
+  
+bilorn_outconn %>%
+  filter(!is.na(side)) %>%
+  count(side, glomerulus, modality, class_partner, wt = ROIweight, name = 'syn') %>%
+  left_join(bilorn_out_glom_syntotal) %>%
+  mutate(class_partner = fct_relevel(class_partner, "PN", "ALLN", "ALRN", "other","unknown"),
+         side = fct_relevel(side, "ipsilateral", "contralateral"),
+         synfrt = syn/syntotal) -> bilorn_outconn_glom_summ
+```
+Compare means between the soma side, for each class of partner.
+```{r compare_means_soma_side}
+bilorn_outconn_glom_summ %>%
+  filter(class_partner%in%c("PN", "ALLN", "ALRN")) %>%
+  select(side, class_partner, synfrt) -> test
+
+compare_means(synfrt ~ side, test, group.by = "class_partner")
+```
+Make a paired plot.
+```{r soma_side_out_paired_plot}
+bilorn_outconn_glom_summ %>%
+  filter(class_partner%in%c("PN", "ALLN", "ALRN")) %>%
+  mutate(class_partner = str_glue("ORN to ", "{class_partner}"),
+         class_partner = fct_relevel(class_partner, "ORN to PN", "ORN to ALLN", "ORN to ALRN")) %>%
+  ggplot(aes(x = side, y=synfrt)) +
+  geom_path(aes(group = glomerulus), col = "grey80", size=0.5) +
+  geom_point(col = "grey80", show.legend = FALSE) +
+  stat_summary(aes(col = side), fun.data = "mean_sdl", fun.args = list(mult = 1), 
+               pch = 18, size = 1.2, show.legend = FALSE) +
+  facet_grid( ~ class_partner) +
+  stat_compare_means(comparisons = list(c("ipsilateral", "contralateral")), synfrt ~ side, paired = TRUE, label = "p.signif") +
+  scale_colour_manual(values = c("ipsilateral" = hemibrain_bright_colors[["yellow"]],
+                                 "contralateral" = hemibrain_bright_colors[["orange"]])) +
+  scale_x_discrete(labels = c("ipsilateral" = "ipsi", "contralateral" = "contra")) +
+  scale_y_continuous(expand = (c(0.00, 0.01)), limits = c(0, 1)) +
+  theme(strip.background = element_blank()) +
+  labs(x = "ORN soma side", y = "fraction of ORN output", col = NULL)
+```
