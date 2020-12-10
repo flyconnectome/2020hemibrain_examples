@@ -79,6 +79,11 @@ However custom queries offer maximum flexibility.
 [link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/hemibrain_opns.Rmd)
 use `neuprintr` to pull morphology and synaptic data for hemibrain antennal lobe projection neurons from neuprint, and perform basic analyses.
 
+#### Examine connectivity for antennal lobe receptor neurons
+`examples/R/hemibrain_opns.Rmd` 
+[link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/hemibrain_alrn_connectivity.Rmd)
+use `hemibrainr` to work with data and meta data related to ALRNs and the glomeruli they innervate.
+
 #### Axon and dendrite splits for neurons
 `examples/R/hemibrain_axons_dendrites.Rmd` 
 [link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/R/hemibrain_axons_dendrites.Rmd)

@@ -28,7 +28,7 @@ theme_set(theme_classic(base_size = 12) + theme(text = element_text(family = "sa
 # Prepare data
 We will use some curated information for ALRNs already in `hemibrainr`: bodyids and some metadata information about them.
 
-The dataframes `rn_info` includes the list of ALRN bodyids (excludes any outliers or ALRNs pending fixes) while `hemibrain_glomeruli_summary` includes info on the types and status of the glomeruli in the dataset.
+The dataframes `rn.info` includes the list of ALRN bodyids (excludes any outliers or ALRNs pending fixes) while `hemibrain_glomeruli_summary` includes info on the types and status of the glomeruli in the dataset.
 
 For the analysis, we will only use glomeruli that are whole (fragmented and non-fragmented RNs), so first we define those. 
 ```{r read_data}
