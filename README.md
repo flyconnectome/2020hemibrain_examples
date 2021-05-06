@@ -106,7 +106,7 @@ showcases the network traversal model used to sort neurons into layers with resp
 contains basic analysis of antennal lobe local neurons (ALLNs).
 
 #### AL glomeruli meshes
-`examples/Python/3_glomerul_meshes.ipynb` [link](examples/Python/3_glomerul_meshes.ipynb)
+`examples/Python/3_glomerul_meshes.ipynb` [link](examples/Python/3_glomeruli_meshes.ipynb)
 demonstrates generating meshes from synapses clouds.
 
 ## Issues?
