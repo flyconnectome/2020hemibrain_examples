@@ -9,6 +9,8 @@ This repository stores example code for [Schlegel, Bates et al. (2020)](https://
 <img src="https://github.com/flyconnectome/2020hemibrain_examples/blob/main/images/hemibrain_to_FAFB.png?raw=true" width="700">
 </p>
 
+If you encounter any issues or have questions, please don't hesitate to open an issue.
+
 ## Relevant libraries
 ### R
 #### the natverse
@@ -96,8 +98,16 @@ use `hemibrainr` to pull connectivity information, which is broken down by axon 
 
 ### Python
 #### Olfactory Layers - Network Traversal
-`examples/Python/1_network_traversal_model.ipynb` [link](https://github.com/flyconnectome/2020hemibrain_examples/blob/main/examples/Python/1_network_traversal_model.ipynb)
-show cases the network traversal model used to sort neurons into layers with respect to the olfactory system.
+`examples/Python/1_network_traversal_model.ipynb` [link](examples/Python/1_network_traversal_model.ipynb)
+showcases the network traversal model used to sort neurons into layers with respect to the olfactory system.
+
+#### ALLN morphology
+`examples/Python/2_ALLN_typing_morphology.ipynb` [link](examples/Python/2_ALLN_typing_morphology.ipynb)
+contains basic analysis of antennal lobe local neurons (ALLNs).
+
+#### AL glomeruli meshes
+`examples/Python/3_glomerul_meshes.ipynb` [link](examples/Python/3_glomerul_meshes.ipynb)
+demonstrates generating meshes from synapses clouds.
 
 ## Issues?
 If you run into errors or something is not working, please open an issue and we'll try to help asap.
